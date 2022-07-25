@@ -124,6 +124,7 @@ class GUI:
 
         # un-hide chat window
         self.Window = tkinter.Tk()
+        self.Window.title("Chat client")
         self.Window.configure(background=BG_GRAY)
         self.Window.withdraw()
 
@@ -175,12 +176,12 @@ class GUI:
         self.Window.title("CHATROOM")
         self.Window.resizable(width=False, height=False)
         self.Window.configure(width=470, height=550, bg=BG_COLOR)
+
         self.labelHead = tkinter.Label(self.Window, bg=BG_COLOR, fg=TEXT_COLOR, text=self.name,
                                        font=FONT_BOLD, pady=5)
-
         self.labelHead.place(relwidth=1)
-        self.line = tkinter.Label(self.Window, width=450, bg=BG_GRAY)
 
+        self.line = tkinter.Label(self.Window, width=450, bg=BG_GRAY)
         self.line.place(relwidth=1, rely=0.07, relheight=0.012)
 
         self.textCons = tkinter.Text(self.Window, width=20, height=2, bg=BG_COLOR, fg=TEXT_COLOR,
@@ -189,34 +190,30 @@ class GUI:
         self.textCons.place(relheight=0.745, relwidth=1, rely=0.08)
 
         self.labelBottom = tkinter.Label(self.Window, bg=BG_GRAY, height=80)
-
         self.labelBottom.place(relwidth=1, rely=0.825)
 
         self.entryMsg = tkinter.Entry(self.labelBottom, bg="#2C3E50", fg=TEXT_COLOR, font=FONT)
-
         # place the given widget
         # into the gui window
         self.entryMsg.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
-
+        # put window select to entry message
         self.entryMsg.focus()
 
         # create a Send Button
         self.buttonMsg = tkinter.Button(self.labelBottom, text="Send", font="Helvetica 10 bold", width=20, bg=BG_GRAY,
                                         command=lambda: self.sendButton(self.entryMsg.get()))
-
         self.buttonMsg.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
 
-        self.textCons.config(cursor="arrow")
+
 
         # create a scroll bar
         scrollbar = tkinter.Scrollbar(self.textCons)
-
         # place the scroll bar
         # into the gui window
         scrollbar.place(relheight=1, relx=0.974)
-
         scrollbar.config(command=self.textCons.yview)
 
+        self.textCons.config(cursor="arrow")
         self.textCons.config(state='disabled')
 
     # function to basically start the thread for sending messages
@@ -224,6 +221,7 @@ class GUI:
         self.textCons.config(state='disabled')
         self.msg = msg
         self.entryMsg.delete(0, 'end')
+        # when you press send, it starts a new thread to send message
         send = threading.Thread(target=self.send_message)
         send.start()
 
@@ -244,6 +242,16 @@ class GUI:
 
                     self.textCons.config(state='disabled')
                     self.textCons.see('end')
+            except ConnectionAbortedError:
+                print("Connection aborted.")
+                break
+            except ConnectionRefusedError:
+                print("Server is not active.")
+                break
+            except Exception as e:
+                print("Unknown Error", e)
+                # self.sock.close()
+                break
             except:
                 # an error will be printed on the command line or console if there's an error
                 print("An error occurred!")
@@ -254,9 +262,13 @@ class GUI:
     def send_message(self):
         self.textCons.config(state='disabled')
         while True:
-            message = f"{self.name}: {self.msg}"
-            client.send(message.encode(FORMAT)) # something goes wrong here that causes bad file desciptor
+            message = f"{self.name}: {self.msg}" # this is currently what is being passed through
+            client.send(message.encode(FORMAT))  # something goes wrong here that causes bad file desciptor
+            if message == 'exit' or 'Exit':
+                client.close()
+                # close GUI
             break
+
 
     # def gui_loop(self):
     #     self.win = tkinter.Tk() # remove any IO from constructor

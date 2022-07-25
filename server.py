@@ -62,12 +62,13 @@ def broadcast(message):
 
 
 def receive():
-
+    # need to expand to take multiple signals
     while True:  # can expand this to do signal handling
-        client, address = server.accept()
+        client, address = server.accept() # need to add Try Exception Here
         # connections.append()
         print(f'connected with {str(address)}') # server logging of message
 
+        #
         client.send("NICK".encode(FORMAT))  # will ask for nickname
         nickname = client.recv(1024)
 
@@ -75,8 +76,9 @@ def receive():
         clients.append(client)
         nicknames.append(nickname)
 
-        print(f"Nickname of the client is {nickname}")
-        broadcast(f"{nickname} connected to server \n".encode(FORMAT),)
+        # need to fix the signal direction here
+        print(f"Nickname of the client is {nickname}") # this should only print once
+        broadcast(f"{nickname} connected to server \n".encode(FORMAT))
         client.send("Connected to server".encode(FORMAT))
 
         # thread = threading.Thread(target=handle, args=(client,))
@@ -90,6 +92,7 @@ def remove_conn(connection):
 
 
 def handle(client):
+    # need to expand to take connection booleans
     while True:
         try:
             message = client.recv(1024)
