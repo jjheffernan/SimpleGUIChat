@@ -255,7 +255,7 @@ class GUI:
         self.textCons.config(state='disabled')
         while True:
             message = f"{self.name}: {self.msg}"
-            client.send(message.encode(FORMAT))
+            client.send(message.encode(FORMAT)) # something goes wrong here that causes bad file desciptor
             break
 
     # def gui_loop(self):

@@ -28,24 +28,47 @@ server.listen(8)
 # can pull from main DB for website
 clients = []
 nicknames = []
+connections = {'name': '', 'connection': []}
 
 # formatting
 FORMAT = 'utf-8'
+
+
+def clientthread(connection, address):
+    connection.send("Welcome to the Hawaiian hangoout!")
+
+    while True:
+        try:
+            message = connection.recv(1024)
+            if message:
+                print(f"{address[0]}: {message}") # logs message on server side
+                broadcast(message, connection)
+            else:
+                remove_conn(connection)
+        except:
+            continue # yes i know this is bad
 
 
 # broad
 def broadcast(message):
     for client in clients:
         client.send(message)
+        # if client != connection:
+        #     try:
+        #         client.send(message)
+        #     except:
+        #         client.close()
+        #         remove_conn(client)
 
 
 def receive():
 
     while True:  # can expand this to do signal handling
         client, address = server.accept()
+        # connections.append()
         print(f'connected with {str(address)}') # server logging of message
 
-        client.send("NICK".encode('utf-8'))  # will ask for nickname
+        client.send("NICK".encode(FORMAT))  # will ask for nickname
         nickname = client.recv(1024)
 
         # room for improvement here, nickname handling can be built out
@@ -53,12 +76,12 @@ def receive():
         nicknames.append(nickname)
 
         print(f"Nickname of the client is {nickname}")
-        broadcast(f"{nickname} connected to server \n".encode("utf-8"))
-        client.send("Connected to server".encode("utf-8"))
+        broadcast(f"{nickname} connected to server \n".encode(FORMAT),)
+        client.send("Connected to server".encode(FORMAT))
 
-        thread = threading.Thread(target=handle, args=(client,))
+        # thread = threading.Thread(target=handle, args=(client,))
         # start threading, passing the comma in args= to make tuple
-        thread.start()
+        # thread.start()
 
 
 def remove_conn(connection):
@@ -70,7 +93,7 @@ def handle(client):
     while True:
         try:
             message = client.recv(1024)
-            print(f"{nicknames[client.index(client)]} is saying {message}" ) # logging statement for server
+            print(f"{nicknames[client.index(client)]} is saying {message}") # logging statement for server
             # need to develop index of nicknames for server side handling
             # this prints on server console log
             broadcast(message)
