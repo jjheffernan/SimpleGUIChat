@@ -50,9 +50,16 @@ def clientthread(connection, address):
 
 
 # broad
-def broadcast(message):
+def broadcast(brod_message):
+    """
+    broadcasts message to all logged in clients
+    called in handle
+    ---
+    :param message: message to be broadcasted, already formatted
+    :return:
+    """
     for client in clients:
-        client.send(message)
+        client.send(brod_message)
         # if client != connection:
         #     try:
         #         client.send(message)
@@ -68,7 +75,7 @@ def receive():
         # connections.append()
         print(f'connected with {str(address)}') # server logging of message
 
-        #
+        # where the nickname should be passed into line
         client.send("NICK".encode(FORMAT))  # will ask for nickname
         nickname = client.recv(1024)
 
@@ -77,6 +84,7 @@ def receive():
         nicknames.append(nickname)
 
         # need to fix the signal direction here
+        # not being passed
         print(f"Nickname of the client is {nickname}") # this should only print once
         broadcast(f"{nickname} connected to server \n".encode(FORMAT))
         client.send("Connected to server".encode(FORMAT))

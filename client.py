@@ -144,7 +144,7 @@ class GUI:
         self.labelName.place(relheight=0.2, relx=0.1, rely=0.2)
 
         # create a entry box for
-        # tyoing the message
+        # typing the message
         self.entryName = tkinter.Entry(self.login, font="Helvetica 14")
 
         self.entryName.place(relwidth=0.4, relheight=0.12, relx=0.35, rely=0.2)
@@ -222,23 +222,35 @@ class GUI:
         self.msg = msg
         self.entryMsg.delete(0, 'end')
         # when you press send, it starts a new thread to send message
+        # this might not supposed to be declared here
         send = threading.Thread(target=self.send_message)
         send.start()
+
+    # function to send messages
+    def send_message(self):
+        self.textCons.config(state='disabled')
+        while True:
+            message = f"{self.name}: {self.msg}"  # this is currently what is being passed through
+            client.send(message.encode(FORMAT))  # something goes wrong here that causes bad file desciptor
+            if message == 'exit' or 'Exit':
+                client.close()
+                # close GUI
+            break
 
     # function to receive messages
     def receive(self):
         while True:
             try:
-                message = client.recv(1024).decode(FORMAT)
+                from_message = client.recv(1024).decode(FORMAT)
 
                 # if the messages from the server is NAME send the client's name
-                if message == 'NAME':
+                if from_message == 'NAME':
                     client.send(self.name.encode(FORMAT))
                 else:
                     # insert messages to text box
                     self.textCons.config(state='normal')
                     self.textCons.insert('end',
-                                         message + "\n\n")
+                                         from_message + "\n\n")
 
                     self.textCons.config(state='disabled')
                     self.textCons.see('end')
@@ -257,17 +269,6 @@ class GUI:
                 print("An error occurred!")
                 client.close()
                 break
-
-    # function to send messages
-    def send_message(self):
-        self.textCons.config(state='disabled')
-        while True:
-            message = f"{self.name}: {self.msg}" # this is currently what is being passed through
-            client.send(message.encode(FORMAT))  # something goes wrong here that causes bad file desciptor
-            if message == 'exit' or 'Exit':
-                client.close()
-                # close GUI
-            break
 
 
     # def gui_loop(self):
